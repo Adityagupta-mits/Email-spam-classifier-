@@ -1,0 +1,27 @@
+# Set default behaviour: normalize line endings on commit
+* text=auto
+
+# Python source files
+*.py text eol=lf
+
+# Web files
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+
+# Config / text files
+*.txt  text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.bat  text eol=crlf
+
+# Binary files — do not touch line endings
+*.pkl  binary
+*.db   binary
+*.ico  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,118 @@
+{
+  "best_model": "Support Vector Machine",
+  "dataset_size": 5572,
+  "class_distribution": {
+    "ham": 4825,
+    "spam": 747
+  },
+  "model_results": {
+    "Multinomial Naive Bayes": {
+      "accuracy": 98.3,
+      "precision": 98.51,
+      "recall": 88.59,
+      "f1_score": 93.29,
+      "confusion_matrix": [
+        [
+          964,
+          2
+        ],
+        [
+          17,
+          132
+        ]
+      ]
+    },
+    "Logistic Regression": {
+      "accuracy": 97.04,
+      "precision": 100.0,
+      "recall": 77.85,
+      "f1_score": 87.55,
+      "confusion_matrix": [
+        [
+          966,
+          0
+        ],
+        [
+          33,
+          116
+        ]
+      ]
+    },
+    "Support Vector Machine": {
+      "accuracy": 98.3,
+      "precision": 97.79,
+      "recall": 89.26,
+      "f1_score": 93.33,
+      "confusion_matrix": [
+        [
+          963,
+          3
+        ],
+        [
+          16,
+          133
+        ]
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 97.76,
+      "precision": 100.0,
+      "recall": 83.22,
+      "f1_score": 90.84,
+      "confusion_matrix": [
+        [
+          966,
+          0
+        ],
+        [
+          25,
+          124
+        ]
+      ]
+    }
+  },
+  "features": [
+    "aah",
+    "aathi",
+    "aathi dear",
+    "aathi love",
+    "abi",
+    "abiola",
+    "able",
+    "able come",
+    "able deliver",
+    "able get",
+    "able pay",
+    "abt",
+    "abta",
+    "abta complimentary",
+    "ac",
+    "acc",
+    "accept",
+    "accept brother",
+    "accept day",
+    "access"
+  ],
+  "top_spam_features": [
+    "url",
+    "txt",
+    "mobile",
+    "claim",
+    "uk",
+    "service",
+    "prize",
+    "ringtone",
+    "video",
+    "reply",
+    "tone",
+    "tf",
+    "pobox",
+    "win",
+    "alert",
+    "ltd",
+    "sexy",
+    "dating",
+    "new",
+    "stop"
+  ]
+}

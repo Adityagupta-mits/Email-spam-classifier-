@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Email Spam Classifier — Department of Information Technology</title>
+  <meta name="description" content="AI-Based Email Spam Classification System using Machine Learning (TF-IDF + Naive Bayes) and NLP for intelligent spam, phishing, and suspicious email detection.">
+  <meta name="keywords" content="email spam classifier, machine learning, NLP, TF-IDF, Naive Bayes, phishing detection">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom styles -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOADING SCREEN OVERLAY (Subtle Pulse)
+══════════════════════════════════════════ -->
+<div class="loading-screen-overlay" id="loading-screen">
+  <img src="/static/img/logo.png" alt="AI Email Spam Classifier Logo" class="logo-loader-img">
+  <div class="loader-text">AI Email Spam Classifier</div>
+  <div style="font-size:.78rem;color:var(--gray-500);margin-top:4px;">Initializing intelligent security engine...</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="landing-nav" id="mainNav">
+  <div class="container-fluid d-flex align-items-center">
+    <!-- Logo -->
+    <a href="/" class="nav-logo me-auto text-decoration-none">
+      <img src="/static/img/logo.png" alt="AI Email Spam Classifier Logo" class="logo-navbar me-2">
+      <div>AI Email Spam Classifier</div>
+    </a>
+
+    <!-- Desktop nav links -->
+    <ul class="nav-links d-none d-md-flex" id="nav-menu">
+      <li><a href="#hero" class="active">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#about">About</a></li>
+      <li>
+        <a href="/dashboard" class="btn-primary-navy text-white rounded px-3 py-2"
+           style="font-size:.82rem;text-decoration:none">
+          <i class="bi bi-grid-fill me-1"></i>Dashboard
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mobile toggle -->
+    <button class="btn btn-sm d-md-none ms-3" id="mobile-nav-toggle"
+            style="background:var(--gray-100);border:1px solid var(--gray-200)">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════════ -->
+<section class="hero-section" id="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <!-- Left content -->
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <div class="hero-badge">
+          <i class="bi bi-cpu"></i>
+          Machine Learning + NLP
+        </div>
+
+        <h1 class="hero-title">
+          AI-Based Email<br>
+          <span>Spam Classification</span><br>
+          System
+        </h1>
+
+        <p class="hero-subtitle">
+          Intelligent email security using Machine Learning and Natural Language Processing
+          to detect spam, phishing, and suspicious email content with explainable AI results.
+        </p>
+
+        <!-- Meta info chips -->
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <span class="hero-badge" style="font-size:.7rem">
+            <i class="bi bi-graph-up"></i>98%+ Accuracy
+          </span>
+          <span class="hero-badge" style="font-size:.7rem">
+            <i class="bi bi-lightning"></i>Real-time Analysis
+          </span>
+          <span class="hero-badge" style="font-size:.7rem">
+            <i class="bi bi-eye"></i>Explainable AI
+          </span>
+        </div>
+
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="/dashboard" class="btn-primary-navy">
+            <i class="bi bi-shield-check"></i>
+            Analyze Email
+          </a>
+          <a href="#about" class="btn-outline-navy">
+            <i class="bi bi-book"></i>
+            Learn More
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Right: Floating email card illustration -->
+      <div class="col-lg-6">
+        <div class="hero-illustration">
+          <div class="hero-card-float">
+            <!-- Mock email -->
+            <div class="email-mock">
+              <div class="from-line">
+                <i class="bi bi-envelope-fill me-1" style="color:var(--navy)"></i>
+                From: rewards@freeprize-claim.xyz
+              </div>
+              <div class="subject-line">🎉 CONGRATULATIONS! You won $1,000,000!</div>
+              <div class="body-line">
+                You have been <span style="background:#FEE2E2;color:#991B1B;padding:0 2px;border-radius:3px;font-weight:600">selected</span>
+                as our lucky winner! Click
+                <span style="background:#FEE2E2;color:#991B1B;padding:0 2px;border-radius:3px;font-weight:600">here immediately</span>
+                to <span style="background:#FEE2E2;color:#991B1B;padding:0 2px;border-radius:3px;font-weight:600">claim your FREE reward</span>...
+              </div>
+            </div>
+
+            <!-- AI analysis result -->
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fw-600" style="font-size:.82rem;color:var(--gray-700)">AI Analysis Result</span>
+              <span class="result-badge-spam">
+                <i class="bi bi-shield-x"></i>SPAM
+              </span>
+            </div>
+
+            <!-- Confidence bar -->
+            <div class="mb-2">
+              <div class="d-flex justify-content-between text-muted-sm mb-1">
+                <span>Confidence</span><span>96.8%</span>
+              </div>
+              <div style="background:var(--gray-200);border-radius:999px;height:6px">
+                <div style="background:var(--danger);width:96.8%;height:6px;border-radius:999px;
+                            transition:width 1.5s ease"></div>
+              </div>
+            </div>
+
+            <!-- Risk score -->
+            <div class="d-flex gap-2 align-items-center" style="font-size:.78rem">
+              <span style="color:var(--gray-500)">Risk Score:</span>
+              <span class="risk-status-label danger" style="font-size:.72rem">92/100 — High Risk</span>
+              <span class="ms-auto" style="color:var(--danger)">
+                <i class="bi bi-exclamation-triangle-fill"></i> Phishing Detected
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STATS STRIP
+══════════════════════════════════════════ -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3 stat-item">
+        <span class="stat-number" data-count="5574" data-suffix="">0</span>
+        <span class="stat-label">Training Emails</span>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <span class="stat-number" data-count="98" data-suffix="%">0%</span>
+        <span class="stat-label">Model Accuracy</span>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <span class="stat-number" data-count="4" data-suffix="">0</span>
+        <span class="stat-label">ML Algorithms</span>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <span class="stat-number" data-count="100" data-suffix="ms">&lt;100ms</span>
+        <span class="stat-label">Prediction Speed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FEATURES SECTION
+══════════════════════════════════════════ -->
+<section id="features" class="section-pad" style="background:var(--white)">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">System Capabilities</div>
+      <h2 class="section-title">What This System Does</h2>
+      <p class="section-subtitle mx-auto">
+        A complete AI-powered pipeline that analyses email content using
+        Natural Language Processing and Machine Learning.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-shield-x"></i></div>
+          <div class="feature-title">Spam Detection</div>
+          <div class="feature-desc">Classify emails as spam or legitimate using TF-IDF vectorisation and Multinomial Naive Bayes.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-cpu-fill"></i></div>
+          <div class="feature-title">AI Classification</div>
+          <div class="feature-desc">Compare 4 ML models — Naive Bayes, Logistic Regression, SVM, Random Forest — and deploy the best.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div class="feature-title">Explainable AI</div>
+          <div class="feature-desc">Understand why every email was classified. Highlighted keywords and clear reasoning provided.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-speedometer2"></i></div>
+          <div class="feature-title">Risk Score</div>
+          <div class="feature-desc">Visual 0–100 risk score with Safe / Suspicious / High Risk status and animated indicator.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-globe"></i></div>
+          <div class="feature-title">URL Analysis</div>
+          <div class="feature-desc">Detect suspicious URLs, shortened links, unusual domains, and excessive link counts.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+          <div class="feature-title">Prediction History</div>
+          <div class="feature-desc">SQLite-stored history with search, filter by spam/ham, pagination, and one-click delete.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-bar-chart-fill"></i></div>
+          <div class="feature-title">Analytics Dashboard</div>
+          <div class="feature-desc">Interactive Chart.js visualisations — bar, pie, line, confidence distribution charts.</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+          <div class="feature-title">Fast & Secure</div>
+          <div class="feature-desc">Sub-100ms local inference. No email data sent externally. Fully offline-capable after setup.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ABOUT SECTION
+══════════════════════════════════════════ -->
+<section id="about" class="section-pad about-section">
+  <div class="container">
+    <div class="row align-items-start g-5">
+      <!-- Left: Explanation -->
+      <div class="col-lg-6">
+        <div class="section-label">Technology</div>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle mb-4">
+          The system combines traditional NLP preprocessing with TF-IDF feature extraction
+          and probabilistic Bayesian classification.
+        </p>
+
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex gap-3 align-items-start">
+            <div class="feature-icon flex-shrink-0" style="width:40px;height:40px;font-size:1rem">
+              <i class="bi bi-text-paragraph"></i>
+            </div>
+            <div>
+              <div class="fw-700" style="font-size:.9rem;color:var(--navy-dark)">Natural Language Processing</div>
+              <p class="text-muted-sm mb-0" style="line-height:1.7">
+                Emails are cleaned by converting to lowercase, removing punctuation and stopwords,
+                then tokenised and lemmatised using NLTK.
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-3 align-items-start">
+            <div class="feature-icon flex-shrink-0" style="width:40px;height:40px;font-size:1rem">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </div>
+            <div>
+              <div class="fw-700" style="font-size:.9rem;color:var(--navy-dark)">TF-IDF Vectorisation</div>
+              <p class="text-muted-sm mb-0" style="line-height:1.7">
+                Term Frequency–Inverse Document Frequency converts text into numerical feature
+                vectors, weighting words that are important for spam classification.
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-3 align-items-start">
+            <div class="feature-icon flex-shrink-0" style="width:40px;height:40px;font-size:1rem">
+              <i class="bi bi-diagram-3"></i>
+            </div>
+            <div>
+              <div class="fw-700" style="font-size:.9rem;color:var(--navy-dark)">Multinomial Naive Bayes</div>
+              <p class="text-muted-sm mb-0" style="line-height:1.7">
+                A probabilistic classifier applying Bayes' Theorem: P(Spam|Email) = P(Email|Spam) × P(Spam) / P(Email).
+                Achieves >98% accuracy on the SMS Spam Collection dataset.
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-3 align-items-start">
+            <div class="feature-icon flex-shrink-0" style="width:40px;height:40px;font-size:1rem">
+              <i class="bi bi-shield-shaded"></i>
+            </div>
+            <div>
+              <div class="fw-700" style="font-size:.9rem;color:var(--navy-dark)">Phishing & Risk Analysis</div>
+              <p class="text-muted-sm mb-0" style="line-height:1.7">
+                15+ phishing regex patterns, URL domain analysis, and a composite risk
+                scorer produce a 0–100 security score alongside the ML prediction.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Architecture diagram -->
+      <div class="col-lg-6">
+        <div class="section-label">Pipeline Architecture</div>
+        <h3 class="fw-700 mb-4" style="font-size:1.1rem;color:var(--navy-dark)">AI Prediction Flow</h3>
+
+        <div class="arch-flow" style="gap:1.5rem">
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-envelope-open"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">Email Input</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">Paste text or upload .txt file</div>
+            </div>
+          </div>
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-filter"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">Text Preprocessing (NLTK)</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">Lowercase → Tokenise → Remove stopwords → Lemmatise</div>
+            </div>
+          </div>
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-grid-3x3-gap"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">TF-IDF Vectorisation</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">5000-feature sparse matrix via scikit-learn</div>
+            </div>
+          </div>
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-cpu"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">ML Classification</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">Multinomial Naive Bayes (best F1 model)</div>
+            </div>
+          </div>
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-speedometer"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">Risk Scoring + XAI</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">Risk 0–100 + keyword reasons + phishing flags</div>
+            </div>
+          </div>
+          <div class="arch-step">
+            <div class="arch-step-icon"><i class="bi bi-check2-circle"></i></div>
+            <div>
+              <div class="fw-600" style="font-size:.85rem">Result + History Saved</div>
+              <div style="font-size:.75rem;color:var(--gray-400)">SQLite storage with confidence & timestamp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Main JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

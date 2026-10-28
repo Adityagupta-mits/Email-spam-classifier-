@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — AI Email Spam Classifier</title>
+  <meta name="description" content="AI Email Spam Classification Dashboard — analyse, classify, and review email predictions.">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- Custom styles -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     SPINNER OVERLAY
+══════════════════════════════════════════════════════════ -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner-box">
+    <div class="spinner-ring"></div>
+    <div class="spinner-title">Analysing Email…</div>
+    <div class="spinner-sub">Running AI prediction pipeline</div>
+    <hr style="border-color:var(--gray-200);margin:.75rem 0">
+    <div id="pipelineSteps" style="text-align:left;min-width:240px"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     APP WRAPPER
+══════════════════════════════════════════════════════════ -->
+<div class="app-wrapper">
+
+  <!-- ───────────────────────────────────────────
+       SIDEBAR
+  ─────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <a href="/dashboard" class="d-flex align-items-center gap-2 text-decoration-none">
+        <img src="/static/img/logo.png" alt="AI Email Spam Classifier Logo" class="logo-dashboard">
+        <div>
+          <span class="text-navy fw-700" style="font-size:.85rem">AI Email Spam Classifier</span>
+          <span class="brand-sub">v1.0 — IT Dept.</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Analysis</div>
+
+      <button class="sidebar-item" data-section="analyze" id="nav-analyze">
+        <i class="bi bi-shield-check"></i>
+        Analyse Email
+      </button>
+
+      <button class="sidebar-item" data-section="history" id="nav-history">
+        <i class="bi bi-clock-history"></i>
+        Prediction History
+      </button>
+
+      <div class="sidebar-section-label mt-2">Insights</div>
+
+      <button class="sidebar-item" data-section="analytics" id="nav-analytics">
+        <i class="bi bi-bar-chart-line"></i>
+        Analytics
+      </button>
+
+      <button class="sidebar-item" data-section="model-info" id="nav-model-info">
+        <i class="bi bi-cpu"></i>
+        Model Information
+      </button>
+
+      <div class="sidebar-section-label mt-2">Help</div>
+
+      <button class="sidebar-item" data-section="about-algo" id="nav-about-algo">
+        <i class="bi bi-book"></i>
+        About Algorithm
+      </button>
+
+      <div class="px-3 mt-auto pt-3 pb-3" style="border-top:1px solid var(--gray-200);margin-top:auto">
+        <a href="/" class="sidebar-item d-flex" style="border-radius:var(--radius);text-decoration:none">
+          <i class="bi bi-house"></i>
+          Landing Page
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ───────────────────────────────────────────
+       MAIN CONTENT
+  ─────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Top header -->
+    <header class="top-header">
+      <!-- Mobile sidebar toggle -->
+      <button class="d-md-none me-2" id="sidebarToggle"
+              style="background:none;border:none;font-size:1.2rem;color:var(--gray-700)">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <!-- Search -->
+      <div class="header-search">
+        <i class="bi bi-search"></i>
+        <input type="text" id="globalSearch" placeholder="Search emails in history…"
+               autocomplete="off">
+      </div>
+
+      <div class="header-spacer"></div>
+
+      <!-- Date -->
+      <div class="header-date d-none d-sm-block" id="headerDate"></div>
+
+      <!-- Status -->
+      <div class="status-badge d-none d-sm-flex">
+        <span class="status-dot"></span>
+        System Online
+      </div>
+
+      <!-- Dark mode -->
+      <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">
+        <i class="bi bi-moon-fill"></i>
+      </button>
+    </header>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <!-- ══════════════════════════════════════
+           OVERVIEW STAT CARDS (always visible)
+      ══════════════════════════════════════ -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-icon sc-navy"><i class="bi bi-envelope-fill"></i></div>
+            <div>
+              <div class="stat-card-value" id="statTotal">—</div>
+              <div class="stat-card-label">Total Analysed</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-icon sc-danger"><i class="bi bi-shield-x"></i></div>
+            <div>
+              <div class="stat-card-value" id="statSpam">—</div>
+              <div class="stat-card-label">Spam Detected</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-icon sc-success"><i class="bi bi-shield-check"></i></div>
+            <div>
+              <div class="stat-card-value" id="statHam">—</div>
+              <div class="stat-card-label">Legitimate Emails</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-icon sc-info"><i class="bi bi-graph-up"></i></div>
+            <div>
+              <div class="stat-card-value" id="statConf">—</div>
+              <div class="stat-card-label">Avg. Confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SECTION: ANALYSE EMAIL
+      ══════════════════════════════════════ -->
+      <div class="dash-section" id="section-analyze">
+        <div class="page-title"><i class="bi bi-shield-check me-2 text-navy"></i>Email Analysis</div>
+        <div class="page-subtitle">Paste your email content or upload a .txt file to classify it instantly.</div>
+
+        <div class="row g-3">
+          <!-- Input column -->
+          <div class="col-lg-5">
+            <div class="card h-100">
+              <div class="card-header-bar">
+                <span><i class="bi bi-envelope-open me-2"></i>Email Input</span>
+                <span class="text-muted-sm">Ctrl+Enter to analyse</span>
+              </div>
+              <div class="card-body-pad d-flex flex-column gap-3">
+                <!-- Text area -->
+                <textarea class="email-textarea" id="emailTextarea"
+                  placeholder="Paste email content here…&#10;&#10;Example: Congratulations! You have won a $1,000,000 prize. Click here to claim immediately."></textarea>
+
+                <!-- Upload zone -->
+                <div class="upload-zone" id="uploadZone">
+                  <i class="bi bi-cloud-upload fs-4 d-block mb-2" style="color:var(--gray-400)"></i>
+                  <div class="fw-500">Drop .txt file here or click to browse</div>
+                  <div class="text-muted-sm mt-1">Supports plain text email files</div>
+                  <input type="file" id="fileInput" accept=".txt" class="d-none">
+                </div>
+
+                <!-- Action buttons -->
+                <div class="d-flex gap-2">
+                  <button class="btn-primary-navy flex-fill justify-content-center" id="analyzeBtn">
+                    <i class="bi bi-shield-check"></i>
+                    Analyse Email
+                  </button>
+                  <button class="btn-outline-navy" id="clearBtn">
+                    <i class="bi bi-x-lg"></i>
+                    Clear
+                  </button>
+                </div>
+
+                <!-- Quick test samples -->
+                <div>
+                  <div class="text-muted-sm mb-2">Quick test samples:</div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <button class="btn btn-sm btn-outline-secondary sample-btn" style="font-size:.72rem"
+                      data-sample="Congratulations! You have won a $1,000,000 lottery prize. Click here immediately to claim your FREE reward before it expires!">
+                      🚫 Spam Sample
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary sample-btn" style="font-size:.72rem"
+                      data-sample="Hi John, can we schedule a meeting tomorrow at 3pm to discuss the project timeline? Please let me know your availability.">
+                      ✅ Ham Sample
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary sample-btn" style="font-size:.72rem"
+                      data-sample="URGENT: Your bank account has been suspended. Verify your identity immediately by clicking this link: http://bit.ly/verify-now or your account will be deleted.">
+                      🎣 Phishing Sample
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Result column -->
+          <div class="col-lg-7">
+            <!-- Result placeholder -->
+            <div id="resultPlaceholder" class="card h-100 d-flex align-items-center justify-content-center"
+                 style="min-height:360px">
+              <div class="text-center p-4">
+                <i class="bi bi-shield-shaded text-navy" style="font-size:3.5rem;opacity:.25"></i>
+                <div class="fw-600 mt-3" style="color:var(--gray-400);font-size:.9rem">
+                  Awaiting Email Analysis
+                </div>
+                <div class="text-muted-sm mt-1">
+                  Enter email content on the left and click <strong>Analyse Email</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result area (populated by JS) -->
+            <div id="resultArea" class="hidden" style="max-height:80vh;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SECTION: PREDICTION HISTORY
+      ══════════════════════════════════════ -->
+      <div class="dash-section hidden" id="section-history">
+        <div class="page-title"><i class="bi bi-clock-history me-2 text-navy"></i>Prediction History</div>
+        <div class="page-subtitle">All email predictions stored in the local SQLite database.</div>
+
+        <div class="card">
+          <!-- Controls bar -->
+          <div class="card-header-bar flex-wrap gap-2">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+              <!-- Filter buttons -->
+              <button class="btn btn-sm btn-outline-secondary active" data-history-filter="">All</button>
+              <button class="btn btn-sm btn-outline-danger" data-history-filter="spam">Spam</button>
+              <button class="btn btn-sm btn-outline-success" data-history-filter="ham">Ham</button>
+            </div>
+
+            <div class="d-flex gap-2 ms-auto flex-wrap">
+              <!-- Search -->
+              <div style="position:relative">
+                <i class="bi bi-search" style="position:absolute;left:.6rem;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:.8rem"></i>
+                <input type="text" id="historySearch" placeholder="Search…"
+                       style="padding:.35rem .75rem .35rem 2rem;border:1px solid var(--gray-200);border-radius:6px;
+                              font-size:.8rem;outline:none;background:var(--white);color:var(--gray-900);
+                              font-family:var(--font)">
+              </div>
+              <button class="btn btn-sm btn-outline-danger" id="clearHistoryBtn">
+                <i class="bi bi-trash3 me-1"></i>Clear All
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-responsive">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Email Preview</th>
+                  <th>Prediction</th>
+                  <th>Confidence</th>
+                  <th>Risk</th>
+                  <th>Date & Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="historyTbody">
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted-sm">
+                    No predictions yet. Analyse an email first.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-wrap">
+            <span id="historyInfo">—</span>
+            <div class="d-flex gap-2">
+              <button class="page-btn" id="historyPrev" disabled>← Prev</button>
+              <button class="page-btn" id="historyNext" disabled>Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SECTION: ANALYTICS
+      ══════════════════════════════════════ -->
+      <div class="dash-section hidden" id="section-analytics">
+        <div class="page-title"><i class="bi bi-bar-chart-line me-2 text-navy"></i>Analytics</div>
+        <div class="page-subtitle">Visual summary of all prediction activity and model performance.</div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="chart-card">
+              <div class="chart-title">
+                <i class="bi bi-bar-chart me-1"></i>Spam vs Legitimate
+              </div>
+              <canvas id="barChart" height="220"></canvas>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-card">
+              <div class="chart-title">
+                <i class="bi bi-pie-chart me-1"></i>Prediction Distribution
+              </div>
+              <canvas id="pieChart" height="220"></canvas>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="chart-card">
+              <div class="chart-title">
+                <i class="bi bi-graph-up me-1"></i>Daily Prediction Trend
+              </div>
+              <canvas id="lineChart" height="220"></canvas>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="chart-card">
+              <div class="chart-title">
+                <i class="bi bi-activity me-1"></i>Confidence Distribution
+              </div>
+              <canvas id="confChart" height="220"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SECTION: MODEL INFORMATION
+      ══════════════════════════════════════ -->
+      <div class="dash-section hidden" id="section-model-info">
+        <div class="page-title"><i class="bi bi-cpu me-2 text-navy"></i>Model Information</div>
+        <div class="page-subtitle">Training dataset, algorithm details, formulas, and performance comparison.</div>
+        <div id="modelInfoContent">
+          <div class="text-center py-5 text-muted-sm">
+            <div class="spinner-ring mx-auto mb-3" style="width:36px;height:36px;border-width:3px"></div>
+            Loading model information…
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SECTION: ABOUT ALGORITHM
+      ══════════════════════════════════════ -->
+      <div class="dash-section hidden" id="section-about-algo">
+        <div class="page-title"><i class="bi bi-book me-2 text-navy"></i>About the Algorithm</div>
+        <div class="page-subtitle">In-depth explanation of the NLP pipeline and machine learning methodology.</div>
+
+        <div class="row g-3">
+          <!-- NLP Pipeline -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header-bar">
+                <span><i class="bi bi-filter me-2 text-navy"></i>NLP Preprocessing Pipeline</span>
+              </div>
+              <div class="card-body-pad">
+                <div class="d-flex flex-column gap-2">
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>1. Lowercase Conversion</strong>
+                    <span class="text-muted-sm ms-2">"WIN" → "win"</span>
+                  </div>
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>2. URL Replacement</strong>
+                    <span class="text-muted-sm ms-2">URLs → [url] token</span>
+                  </div>
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>3. Punctuation Removal</strong>
+                    <span class="text-muted-sm ms-2">Remove @#$%! etc.</span>
+                  </div>
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>4. Tokenisation (NLTK)</strong>
+                    <span class="text-muted-sm ms-2">Split into word tokens</span>
+                  </div>
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>5. Stopword Removal</strong>
+                    <span class="text-muted-sm ms-2">Remove "the", "is", "a"…</span>
+                  </div>
+                  <div class="pipeline-step done">
+                    <span class="step-dot"></span>
+                    <strong>6. Lemmatisation (WordNet)</strong>
+                    <span class="text-muted-sm ms-2">"winning" → "win"</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TF-IDF Explained -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header-bar">
+                <span><i class="bi bi-grid-3x3-gap me-2 text-navy"></i>TF-IDF Explained</span>
+              </div>
+              <div class="card-body-pad">
+                <div class="formula-box mb-3">
+                  <span class="formula-label">TF-IDF Formula</span>
+                  TF-IDF(t, d) = TF(t, d) × IDF(t)<br>
+                  IDF(t) = log(N / df(t))
+                </div>
+                <div style="font-size:.82rem;color:var(--gray-700);line-height:1.9">
+                  <div class="mb-2">
+                    <strong>Example:</strong> In an email containing 100 words where "free" appears 5 times:
+                  </div>
+                  <div class="formula-box" style="font-size:.78rem;padding:.75rem">
+                    TF("free") = 5/100 = 0.05<br>
+                    IDF("free") = log(5574/600) ≈ 2.23<br>
+                    TF-IDF = 0.05 × 2.23 = <strong>0.112</strong>
+                  </div>
+                  Words rare across the corpus but frequent in one email
+                  get high TF-IDF — key spam signal!
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Naive Bayes -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header-bar">
+                <span><i class="bi bi-diagram-3 me-2 text-navy"></i>Multinomial Naive Bayes</span>
+              </div>
+              <div class="card-body-pad">
+                <div class="formula-box mb-3">
+                  <span class="formula-label">Bayes' Theorem</span>
+                  P(Spam | Email) =
+                  P(Email | Spam) × P(Spam) / P(Email)
+                </div>
+                <div style="font-size:.82rem;color:var(--gray-700);line-height:1.9">
+                  <strong>Prior P(Spam):</strong> ~13.4% of emails in training are spam.<br>
+                  <strong>Likelihood P(Email|Spam):</strong> Product of each word's spam probability.<br>
+                  <strong>Posterior P(Spam|Email):</strong> Final classification probability.<br>
+                  <br>
+                  The <em>"naive"</em> assumption: all words are independent given the class.
+                  Despite being unrealistic, it works extremely well in practice.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Why NB works -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header-bar">
+                <span><i class="bi bi-check2-all me-2 text-navy"></i>Why Naive Bayes Works for Spam</span>
+              </div>
+              <div class="card-body-pad">
+                <div class="d-flex flex-column gap-3" style="font-size:.83rem;color:var(--gray-700)">
+                  <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                    <div><strong>Fast training and inference</strong> — scales linearly with feature count.</div>
+                  </div>
+                  <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                    <div><strong>Handles high-dimensional sparse data</strong> — exactly what TF-IDF produces.</div>
+                  </div>
+                  <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                    <div><strong>Probabilistic output</strong> — gives interpretable confidence scores.</div>
+                  </div>
+                  <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                    <div><strong>>98% accuracy</strong> on the SMS Spam Collection benchmark dataset.</div>
+                  </div>
+                  <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                    <div><strong>Resistant to overfitting</strong> — works well with limited labelled data.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk scoring -->
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header-bar">
+                <span><i class="bi bi-speedometer2 me-2 text-navy"></i>Risk Score System</span>
+              </div>
+              <div class="card-body-pad">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <div class="text-center p-3 rounded" style="background:var(--gray-50);border:1px solid var(--gray-200)">
+                      <div class="fw-700" style="font-size:1.5rem;color:var(--success)">0 – 30</div>
+                      <div class="risk-status-label success mt-1">Safe</div>
+                      <div class="text-muted-sm mt-2">No significant spam signals detected.</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center p-3 rounded" style="background:var(--gray-50);border:1px solid var(--gray-200)">
+                      <div class="fw-700" style="font-size:1.5rem;color:#92400E">31 – 70</div>
+                      <div class="risk-status-label warning mt-1">Suspicious</div>
+                      <div class="text-muted-sm mt-2">Some spam-like features found. Use caution.</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center p-3 rounded" style="background:var(--gray-50);border:1px solid var(--gray-200)">
+                      <div class="fw-700" style="font-size:1.5rem;color:var(--danger)">71 – 100</div>
+                      <div class="risk-status-label danger mt-1">High Risk</div>
+                      <div class="text-muted-sm mt-2">Strong spam or phishing indicators. Do not interact.</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-size:.82rem;color:var(--gray-700)">
+                  <strong>Score Formula:</strong>
+                  Risk Score = (ML Confidence × 0.7) + URL Penalty + Phishing Pattern Score
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End sections -->
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app-wrapper -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Dashboard JS -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<!-- Quick sample buttons -->
+<script>
+  document.querySelectorAll(".sample-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const ta = document.getElementById("emailTextarea");
+      if (ta) {
+        ta.value = btn.dataset.sample;
+        ta.focus();
+      }
+    });
+  });
+
+  // Global search redirects to history
+  document.getElementById("globalSearch")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const val = e.target.value.trim();
+      if (val) {
+        window.showSection("history");
+        const hi = document.getElementById("historySearch");
+        if (hi) {
+          hi.value = val;
+          hi.dispatchEvent(new Event("input"));
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>

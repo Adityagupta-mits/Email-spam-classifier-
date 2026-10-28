@@ -1,0 +1,90 @@
+# ──────────────────────────────────────────
+# Python
+# ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# ──────────────────────────────────────────
+# Virtual environments
+# ──────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# ──────────────────────────────────────────
+# Environment / secrets
+# ──────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.secret
+
+# ──────────────────────────────────────────
+# SQLite database (auto-created at runtime)
+# ──────────────────────────────────────────
+database.db
+*.db
+*.sqlite3
+
+# ──────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────
+*.log
+logs/
+
+# ──────────────────────────────────────────
+# IDE / editor settings
+# ──────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ──────────────────────────────────────────
+# Dataset downloads (zip)
+# ──────────────────────────────────────────
+dataset/sms_spam.zip
+
+# ──────────────────────────────────────────
+# OS-generated files
+# ──────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# ──────────────────────────────────────────
+# NOTE: The following are intentionally
+# INCLUDED in the repository:
+#   model/spam_model.pkl        (40 KB - safe)
+#   model/tfidf_vectorizer.pkl  (185 KB - safe)
+#   model/model_metrics.json
+#   dataset/emails.csv          (477 KB - safe)
+#   dataset/SMSSpamCollection
+#   requirements.txt
+#   run.bat
+#   app.py, preprocess.py, train_model.py
+#   templates/, static/
+# ──────────────────────────────────────────
